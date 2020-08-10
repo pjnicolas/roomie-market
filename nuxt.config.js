@@ -1,9 +1,9 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  mode: 'spa',
+  mode: 'universal',
 
-  target: 'static',
+  target: 'server',
 
   head: {
     titleTemplate: '%s',
@@ -22,6 +22,9 @@ export default {
   ],
 
   plugins: [
+    { src: '~plugins/boot', ssr: false },
+    { src: '~plugins/rules' },
+    { src: '~plugins/filters' },
   ],
 
   components: true,
