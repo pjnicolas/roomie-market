@@ -7,5 +7,6 @@ export default function (_, inject) {
   inject('rules', {
     notEmpty: (x) => !isEmpty(x) || 'El campo no puede estar vacío',
     email: (x) => isValidEmail(x) || 'El campo no es un email válido',
+    positive: (x) => Number(x) > 0 || 'El campo debe ser un numero positivo',
   })
 }

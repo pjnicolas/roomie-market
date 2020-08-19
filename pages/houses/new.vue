@@ -4,29 +4,36 @@
       New house
     </v-card-title>
     <v-card-text>
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="house"
-            label="The name of the house"
-            :rules="[$rules.notEmpty]"
-            outlined
-            required
-          />
-        </v-col>
-        <v-col cols="12">
-          <v-text-field
-            v-model="user"
-            label="Your name in the house"
-            :rules="[$rules.notEmpty]"
-            outlined
-            required
-          />
-        </v-col>
-      </v-row>
-      <v-btn color="primary" :loading="loading" @click="handleCreate">
-        Create
-      </v-btn>
+      <v-form v-model="isValid">
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="house"
+              label="The name of the house"
+              :rules="[$rules.notEmpty]"
+              outlined
+              required
+            />
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              v-model="user"
+              label="Your name in the house"
+              :rules="[$rules.notEmpty]"
+              outlined
+              required
+            />
+          </v-col>
+        </v-row>
+        <v-btn
+          color="primary"
+          :loading="loading"
+          :disabled="!isValid"
+          @click="handleCreate"
+        >
+          Create
+        </v-btn>
+      </v-form>
     </v-card-text>
   </v-card>
 </template>
@@ -40,6 +47,7 @@ export default {
       house: null,
       user: null,
       loading: false,
+      isValid: false,
     }
   },
   methods: {
