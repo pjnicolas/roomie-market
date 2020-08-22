@@ -4,7 +4,7 @@
       {{ pageNotFound }}
     </h1>
     <h1 v-else>
-      {{ otherError }}
+      {{ otherError }} {{ error.statusCode }}
     </h1>
     <NuxtLink to="/">
       Home page
@@ -26,6 +26,9 @@ export default {
       pageNotFound: '404 Not Found',
       otherError: 'An error occurred',
     }
+  },
+  mounted() {
+    console.error(this.error)
   },
   head() {
     const title =

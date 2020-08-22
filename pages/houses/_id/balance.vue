@@ -34,7 +34,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { getMiddleScoreFromUsers } from '../../../lib/helpers'
+import { getMiddleScoreFromUsers } from '@/lib/helpers'
 
 export default {
   data() {
@@ -51,6 +51,7 @@ export default {
     ...mapState('users', ['list']),
 
     sortedList() {
+      if (!this.list) { return [] }
       const middle = getMiddleScoreFromUsers(this.list)
 
       const result = this.list.slice()
