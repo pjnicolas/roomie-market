@@ -2,31 +2,32 @@ import { firestore } from 'firebase'
 
 export const state = () => ({
   list: null,
-  houseId: null,
+  item: null,
 })
 
 export const mutations = {
   SET_LIST(state, payload) {
     state.list = payload
   },
-  SET_HOUSE_ID(state, payload) {
-    state.houseId = payload
+  SET_ITEM(state, payload) {
+    state.item = payload
   },
 }
 
 export const getters = {}
 
 let stopSnapshot = null
+let lastIdHouse = null
 
 export const actions = {
-  watchList({ commit, state }, houseId) {
-    if (state.houseId !== houseId) {
-      commit('SET_HOUSE_ID', houseId)
+  watchList({ commit }, idHouse) {
+    if (lastIdHouse !== idHouse) {
+      lastIdHouse = idHouse
       commit('SET_LIST', null)
       if (stopSnapshot) {
         stopSnapshot()
       }
-      stopSnapshot = firestore().collection('houses').doc(houseId).collection('market')
+      stopSnapshot = firestore().collection('houses').doc(idHouse).collection('market')
         .onSnapshot((marketSnapshot) => {
           const list = marketSnapshot.docs.map((marketDocument) => {
             const data = marketDocument.data()
@@ -38,10 +39,19 @@ export const actions = {
     }
   },
 
-  create({ state }, task) {
+  getItem({ commit }, { idHouse, idTask }) {
+    return firestore().collection('houses').doc(idHouse).collection('market').doc(idTask).get()
+      .then((taskSnap) => {
+        const item = { ...taskSnap.data(), id: taskSnap.id }
+        commit('SET_ITEM', item)
+        return item
+      })
+  },
+
+  create(_, { idHouse, task }) {
     const addTaskPromise = firestore()
       .collection('houses')
-      .doc(state.houseId)
+      .doc(idHouse)
       .collection('market')
       .add(task)
 
@@ -50,10 +60,19 @@ export const actions = {
     return Promise.all([addTaskPromise])
   },
 
-  complete({ state, rootState }, { task, deltaScore }) {
+  update(_, { idHouse, idTask, task }) {
+    const houseDoc = firestore().collection('houses').doc(idHouse)
+    const updateTaskPromise = houseDoc.collection('market').doc(idTask).update(task)
+
+    // TODO: Add EDIT history
+
+    return Promise.all([updateTaskPromise])
+  },
+
+  complete({ rootState }, { idHouse, idTask, deltaScore }) {
     const { uid } = rootState.auth.user
-    const houseDoc = firestore().collection('houses').doc(state.houseId)
-    const addTaskPromise = houseDoc.collection('market').doc(task.id).update({
+    const houseDoc = firestore().collection('houses').doc(idHouse)
+    const addTaskPromise = houseDoc.collection('market').doc(idTask.id).update({
       // TODO: Do this in the server! The date could be wrong in the client side
       lastTimeDone: Date.now(),
     })
@@ -70,14 +89,5 @@ export const actions = {
     // TODO: Add DONE history
 
     return Promise.all([addTaskPromise, addScoreToUserPromise])
-  },
-
-  edit({ state }, { task }) {
-    const houseDoc = firestore().collection('houses').doc(state.houseId)
-    const updateTaskPromise = houseDoc.collection('market').doc(task.id).update(task)
-
-    // TODO: Add EDIT history
-
-    return Promise.all([updateTaskPromise])
   },
 }

@@ -34,6 +34,10 @@
         </template>
       </v-data-table>
     </v-card-text>
+    <DialogTaskDetail
+      :task="selectedTask"
+      @exit="selectedTask = null"
+    />
   </v-card>
 </template>
 
@@ -44,6 +48,7 @@ import { getScoreFromTask } from '@/lib/helpers'
 export default {
   data() {
     return {
+      selectedTask: null,
       headers: [
         { text: '', value: 'color', width: '0%', divider: true },
         { text: 'Name', value: 'name', width: '100%' },
@@ -69,19 +74,15 @@ export default {
   },
 
   created() {
-    const houseId = this.$route.params.id
-    this.watchList(houseId)
+    const { idHouse } = this.$route.params
+    this.watchList(idHouse)
   },
 
   methods: {
-    ...mapActions('market', ['watchList', 'complete']),
+    ...mapActions('market', ['watchList']),
 
     handleClickRow(task) {
-      console.log('clicked', task)
-      this.complete({
-        task,
-        deltaScore: getScoreFromTask(task, Date.now()),
-      })
+      this.selectedTask = task
     },
 
     getTaskColor(task) {

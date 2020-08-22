@@ -68,8 +68,8 @@ export default {
   computed: {
     ...mapState('auth', ['loading', 'user']),
 
-    houseId() {
-      return this.$route.params.id
+    idHouse() {
+      return this.$route.params.idHouse
     },
 
     items() {
@@ -81,24 +81,24 @@ export default {
         },
       ]
 
-      if (this.houseId) {
+      if (this.idHouse) {
         items = [
           ...items,
           null,
           {
             icon: 'mdi-store',
             title: 'Market',
-            to: `/houses/${this.houseId}/market`,
+            to: `/houses/${this.idHouse}/market`,
           },
           {
             icon: 'mdi-history',
             title: 'History',
-            to: `/houses/${this.houseId}/history`,
+            to: `/houses/${this.idHouse}/history`,
           },
           {
             icon: 'mdi-scale-balance',
             title: 'Balance',
-            to: `/houses/${this.houseId}/balance`,
+            to: `/houses/${this.idHouse}/balance`,
           },
         ]
       }

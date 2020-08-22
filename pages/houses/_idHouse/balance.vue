@@ -80,8 +80,8 @@ export default {
   },
 
   created() {
-    const houseId = this.$route.params.id
-    this.watchList(houseId)
+    const { idHouse } = this.$route.params
+    this.watchList(idHouse)
   },
 
   methods: {
