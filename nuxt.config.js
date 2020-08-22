@@ -22,7 +22,7 @@ export default {
   ],
 
   plugins: [
-    { src: '~plugins/boot', ssr: false },
+    { src: '~plugins/boot' },
     { src: '~plugins/rules' },
     { src: '~plugins/filters' },
   ],
