@@ -74,10 +74,14 @@ export default {
   },
 
   methods: {
-    ...mapActions('market', ['watchList']),
+    ...mapActions('market', ['watchList', 'complete']),
 
     handleClickRow(task) {
       console.log('clicked', task)
+      this.complete({
+        task,
+        deltaScore: getScoreFromTask(task, Date.now()),
+      })
     },
 
     getTaskColor(task) {
