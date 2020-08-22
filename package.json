@@ -10,7 +10,7 @@
     "lint:js": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "lint": "npm run lint:js",
     "test": "jest",
-    "deploy": "echo roomiemarket.pjnicolas.com > ./dist/CNAME && push-dir --dir=dist --branch=gh-pages --cleanup"
+    "deploy": "firebase deploy --only=hosting"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.12.0",
@@ -30,7 +30,6 @@
     "eslint": "^7.5.0",
     "eslint-plugin-nuxt": "^1.0.0",
     "jest": "^26.1.0",
-    "push-dir": "^0.4.1",
     "vue-jest": "^3.0.4"
   }
 }
