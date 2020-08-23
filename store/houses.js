@@ -34,6 +34,7 @@ export const actions = {
     const { uid } = rootState.auth.user
     await newHouse.collection('users').doc(uid).set({
       name: user,
+      score: 0,
     })
     await firestore().collection('users').doc(uid).update({
       houses: firestore.FieldValue.arrayUnion(newHouse.id),

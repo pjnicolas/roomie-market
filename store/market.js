@@ -72,7 +72,7 @@ export const actions = {
   complete({ rootState }, { idHouse, idTask, deltaScore }) {
     const { uid } = rootState.auth.user
     const houseDoc = firestore().collection('houses').doc(idHouse)
-    const addTaskPromise = houseDoc.collection('market').doc(idTask.id).update({
+    const addTaskPromise = houseDoc.collection('market').doc(idTask).update({
       // TODO: Do this in the server! The date could be wrong in the client side
       lastTimeDone: Date.now(),
     })
