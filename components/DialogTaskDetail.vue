@@ -61,7 +61,7 @@ export default {
     handleConfirm() {
       this.complete({
         idHouse: this.$route.params.idHouse,
-        idTask: this.task.id,
+        task: this.task,
         deltaScore: this.score,
       })
         .then(() => {

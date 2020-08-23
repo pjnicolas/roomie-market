@@ -69,10 +69,10 @@ export const actions = {
     return Promise.all([updateTaskPromise])
   },
 
-  complete({ rootState }, { idHouse, idTask, deltaScore }) {
+  complete({ rootState }, { idHouse, task, deltaScore }) {
     const { uid } = rootState.auth.user
     const houseDoc = firestore().collection('houses').doc(idHouse)
-    const addTaskPromise = houseDoc.collection('market').doc(idTask).update({
+    const addTaskPromise = houseDoc.collection('market').doc(task.id).update({
       // TODO: Do this in the server! The date could be wrong in the client side
       lastTimeDone: Date.now(),
     })
@@ -88,6 +88,13 @@ export const actions = {
 
     // TODO: Add DONE history
 
-    return Promise.all([addTaskPromise, addScoreToUserPromise])
+    const addHistoryPromise = houseDoc.collection('history').add({
+      type: 'done',
+      user: uid,
+      task,
+      deltaScore,
+    })
+
+    return Promise.all([addTaskPromise, addScoreToUserPromise, addHistoryPromise])
   },
 }
