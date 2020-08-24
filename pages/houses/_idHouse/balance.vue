@@ -56,8 +56,8 @@ export default {
 
       const result = this.list.slice()
         .sort((a, b) => {
-          if (a.score > b.score) { return 1 }
-          if (a.score < b.score) { return -1 }
+          if (a.score > b.score) { return -1 }
+          if (a.score < b.score) { return 1 }
           return 0
         })
         .map((u) => {
