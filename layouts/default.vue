@@ -38,6 +38,9 @@
           <nuxt />
         </v-container>
       </v-main>
+
+      <Toast />
+
       <v-footer fixed app>
         <span>
           &copy; {{ new Date().getFullYear() }} — Created and designed by Pedro
@@ -84,6 +87,12 @@ export default {
       if (this.idHouse) {
         items = [
           ...items,
+          null,
+          {
+            icon: 'mdi-cog',
+            title: 'House settings',
+            to: `/houses/${this.idHouse}/settings`,
+          },
           null,
           {
             icon: 'mdi-store',

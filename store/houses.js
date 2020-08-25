@@ -25,6 +25,20 @@ export const actions = {
     commit('SET_LIST', housesData)
   },
 
+  getItem({ rootState }, { idHouse }) {
+    const { uid } = rootState.auth.user
+    const houseDoc = firestore().collection('houses').doc(idHouse)
+    return houseDoc.get().then((houseSnapshot) => {
+      return houseDoc.collection('users').doc(uid).get().then((userSnapshot) => {
+        return {
+          id: houseSnapshot.id,
+          house: houseSnapshot.data().name,
+          user: userSnapshot.data().name,
+        }
+      })
+    })
+  },
+
   async create({ rootState }, { house, user }) {
     const colHouses = firestore().collection('houses')
     const newHouse = await colHouses.add({
@@ -39,5 +53,14 @@ export const actions = {
     await firestore().collection('users').doc(uid).update({
       houses: firestore.FieldValue.arrayUnion(newHouse.id),
     })
+  },
+
+  edit({ rootState }, { idHouse, house, user }) {
+    const { uid } = rootState.auth.user
+    const docHouses = firestore().collection('houses').doc(idHouse)
+    return Promise.all([
+      docHouses.update({ name: house }),
+      docHouses.collection('users').doc(uid).update({ name: user }),
+    ])
   },
 }
