@@ -97,4 +97,10 @@ export const actions = {
 
     return Promise.all([addTaskPromise, addScoreToUserPromise, addHistoryPromise])
   },
+
+  delete(_, { idHouse, idTask }) {
+    const houseDoc = firestore().collection('houses').doc(idHouse)
+    // TODO: Update reference in history
+    return houseDoc.collection('market').doc(idTask).delete()
+  },
 }

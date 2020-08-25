@@ -39,14 +39,39 @@
             />
           </v-col>
         </v-row>
+
         <v-btn
+          v-if="!idTask"
           color="primary"
           :disabled="!isValid"
           :loading="loading"
           @click="handleClickButton"
         >
-          {{ idTask ? 'Edit task' : 'Create task' }}
+          Create task
         </v-btn>
+
+        <div v-else class="d-flex">
+          <ButtonConfirm
+            title="Edit task"
+            description="Are you sure you want to edit the task? The task name will be replaced in the history, and the current score may change. Reset the task afterward if you want to set the score to zero."
+            color="primary"
+            label="Edit task"
+            :disabled="!isValid || loading || loadingDelete"
+            :loading="loading"
+            @click="handleClickButton"
+          />
+
+          <v-spacer />
+
+          <ButtonConfirm
+            title="Delete task"
+            description="Are you sure you want to delete this task? You can not undone this action. The task will still be visible in the history."
+            color="error"
+            label="Delete permanently"
+            :loading="loading || loadingDelete"
+            @click="handleClickDelete"
+          />
+        </div>
       </v-form>
     </v-card-text>
   </v-card>
@@ -57,11 +82,10 @@ import { mapActions } from 'vuex'
 
 export default {
   data() {
-    const { idTask } = this.$route.params
     return {
-      idTask,
       isValid: false,
       loading: false,
+      loadingDelete: false,
       loadingTask: true,
       name: null,
       frequency: null,
@@ -69,10 +93,18 @@ export default {
     }
   },
 
+  computed: {
+    idHouse() {
+      return this.$route.params.idHouse
+    },
+    idTask() {
+      return this.$route.params.idTask
+    },
+  },
+
   created() {
-    const { idHouse } = this.$route.params
     if (this.idTask) {
-      this.getItem({ idHouse, idTask: this.idTask })
+      this.getItem({ idHouse: this.idHouse, idTask: this.idTask })
         .then((task) => {
           this.loadingTask = false
           this.name = task.name
@@ -83,14 +115,14 @@ export default {
   },
 
   methods: {
-    ...mapActions('market', ['create', 'update', 'getItem']),
+    ...mapActions('market', ['create', 'update', 'getItem', 'delete']),
 
     async handleClickButton() {
       this.loading = true
       if (!this.idTask) {
         try {
           await this.create({
-            idHouse: this.$route.params.idHouse,
+            idHouse: this.idHouse,
             task: {
               name: this.name,
               frequency: Number(this.frequency),
@@ -106,7 +138,7 @@ export default {
       } else {
         try {
           await this.update({
-            idHouse: this.$route.params.idHouse,
+            idHouse: this.idHouse,
             idTask: this.idTask,
             task: {
               name: this.name,
@@ -120,6 +152,20 @@ export default {
           this.loading = false
         }
       }
+    },
+
+    handleClickDelete() {
+      this.loadingDelete = true
+      this.delete({
+        idHouse: this.idHouse,
+        idTask: this.idTask,
+      })
+        .then(() => {
+          this.$router.push('../market')
+        })
+        .finally(() => {
+          this.loadingDelete = false
+        })
     },
   },
 }
