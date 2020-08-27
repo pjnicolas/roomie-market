@@ -20,6 +20,15 @@
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field
+              v-if="isStatic"
+              value="0"
+              label="Frequency of the task in days"
+              disabled
+              type="number"
+              outlined
+            />
+            <v-text-field
+              v-else
               v-model="frequency"
               label="Frequency of the task in days"
               type="number"
@@ -36,6 +45,13 @@
               outlined
               :rules="[$rules.notEmpty, $rules.positive]"
               required
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-checkbox
+              v-model="isStatic"
+              label="Is a static task?"
+              class="ma-0 pa-0"
             />
           </v-col>
         </v-row>
@@ -100,6 +116,7 @@ export default {
       name: null,
       frequency: null,
       effort: null,
+      isStatic: false,
     }
   },
 
@@ -112,6 +129,14 @@ export default {
     },
   },
 
+  watch: {
+    isStatic() {
+      if (this.isStatic) {
+        this.frequency = null
+      }
+    },
+  },
+
   created() {
     if (this.idTask) {
       this.getItem({ idHouse: this.idHouse, idTask: this.idTask })
@@ -120,6 +145,9 @@ export default {
           this.name = task.name
           this.frequency = task.frequency
           this.effort = task.effort
+          if (!task.frequency) {
+            this.isStatic = true
+          }
         })
     }
   },
@@ -135,7 +163,7 @@ export default {
             idHouse: this.idHouse,
             task: {
               name: this.name,
-              frequency: Number(this.frequency),
+              frequency: this.isStatic ? null : Number(this.frequency),
               effort: Number(this.effort),
               lastTimeDone: Date.now(),
             },

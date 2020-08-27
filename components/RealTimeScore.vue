@@ -15,7 +15,7 @@ export default {
     },
     frequency: {
       type: Number,
-      required: true,
+      default: null,
     },
     lastTimeDone: {
       type: Number,
