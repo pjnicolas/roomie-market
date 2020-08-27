@@ -98,6 +98,13 @@ export default {
             }
             // mdi-arrow-left-circle
             break
+          case 'reset':
+            extra = {
+              ...h,
+              icon: 'mdi-arrow-left-circle',
+              iconColor: 'orange',
+            }
+            break
         }
 
         const user = this.listUsers.find((u) => u.id === h.user)

@@ -56,19 +56,30 @@
             description="Are you sure you want to edit the task? The task name will be replaced in the history, and the current score may change. Reset the task afterward if you want to set the score to zero."
             color="primary"
             label="Edit task"
-            :disabled="!isValid || loading || loadingDelete"
+            :disabled="!isValid || loading"
             :loading="loading"
             @click="handleClickButton"
           />
 
           <v-spacer />
 
+          <div class="mr-4">
+            <ButtonConfirm
+              title="Reset task"
+              description="Are you sure you want to reset this task? This will set the score to 0. This action can not be undone."
+              color="orange"
+              label="Reset task"
+              :loading="loading"
+              @click="handleClickReset"
+            />
+          </div>
+
           <ButtonConfirm
             title="Delete task"
             description="Are you sure you want to delete this task? You can not undone this action. The task will still be visible in the history."
             color="error"
             label="Delete permanently"
-            :loading="loading || loadingDelete"
+            :loading="loading"
             @click="handleClickDelete"
           />
         </div>
@@ -85,7 +96,6 @@ export default {
     return {
       isValid: false,
       loading: false,
-      loadingDelete: false,
       loadingTask: true,
       name: null,
       frequency: null,
@@ -115,7 +125,7 @@ export default {
   },
 
   methods: {
-    ...mapActions('market', ['create', 'update', 'getItem', 'delete']),
+    ...mapActions('market', ['create', 'update', 'getItem', 'delete', 'reset']),
 
     async handleClickButton() {
       this.loading = true
@@ -156,7 +166,7 @@ export default {
     },
 
     handleClickDelete() {
-      this.loadingDelete = true
+      this.loading = true
       this.delete({
         idHouse: this.idHouse,
         idTask: this.idTask,
@@ -165,7 +175,21 @@ export default {
           this.$router.push('../market')
         })
         .finally(() => {
-          this.loadingDelete = false
+          this.loading = false
+        })
+    },
+
+    handleClickReset() {
+      this.loading = true
+      this.reset({
+        idHouse: this.idHouse,
+        idTask: this.idTask,
+      })
+        .then(() => {
+          this.$router.push('../market')
+        })
+        .finally(() => {
+          this.loading = false
         })
     },
   },

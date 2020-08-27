@@ -132,4 +132,28 @@ export const actions = {
       historyAddPromise,
     ])
   },
+
+  async reset({ rootState }, { idHouse, idTask }) {
+    const { uid } = rootState.auth.user
+
+    const houseDoc = firestore().collection('houses').doc(idHouse)
+    const task = await houseDoc.collection('market').doc(idTask).get()
+    const { name } = task.data()
+
+    const now = Date.now()
+    const resetTaskPromise = task.ref.update({
+      lastTimeDone: now,
+    })
+
+    const historyCol = houseDoc.collection('history')
+    const historyAddPromise = historyCol.add({
+      type: 'reset',
+      user: uid,
+      timestamp: now,
+      idTask,
+      fallback: name,
+    })
+
+    await Promise.all([resetTaskPromise, historyAddPromise])
+  },
 }
