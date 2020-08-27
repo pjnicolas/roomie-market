@@ -39,41 +39,52 @@ export const actions = {
     }
   },
 
-  getItem({ commit }, { idHouse, idTask }) {
-    return firestore().collection('houses').doc(idHouse).collection('market').doc(idTask).get()
-      .then((taskSnap) => {
-        const item = { ...taskSnap.data(), id: taskSnap.id }
-        commit('SET_ITEM', item)
-        return item
-      })
+  async getItem({ commit }, { idHouse, idTask }) {
+    const taskSnap = await firestore().collection('houses').doc(idHouse).collection('market').doc(idTask).get()
+    const item = { ...taskSnap.data(), id: taskSnap.id }
+    commit('SET_ITEM', item)
+    return item
   },
 
-  create(_, { idHouse, task }) {
-    const addTaskPromise = firestore()
-      .collection('houses')
-      .doc(idHouse)
-      .collection('market')
-      .add(task)
+  async create({ rootState }, { idHouse, task }) {
+    const { uid } = rootState.auth.user
 
-    // TODO: Add CREATE history
+    const docHouse = firestore().collection('houses').doc(idHouse)
 
-    return Promise.all([addTaskPromise])
+    const taskRef = await docHouse.collection('market').add(task)
+    return docHouse.collection('history').add({
+      type: 'create',
+      user: uid,
+      timestamp: Date.now(),
+      idTask: taskRef.id,
+      fallback: task.name,
+    })
   },
 
-  update(_, { idHouse, idTask, task }) {
-    const houseDoc = firestore().collection('houses').doc(idHouse)
-    const updateTaskPromise = houseDoc.collection('market').doc(idTask).update(task)
+  async update({ rootState }, { idHouse, idTask, task }) {
+    const { uid } = rootState.auth.user
+    const docHouse = firestore().collection('houses').doc(idHouse)
+    const updateTaskPromise = docHouse.collection('market').doc(idTask).update(task)
 
-    // TODO: Add EDIT history
+    const oldTaskSnap = await docHouse.collection('market').doc(idTask).get()
+    const oldTask = oldTaskSnap.data()
+    const historyPromise = docHouse.collection('history').add({
+      type: 'update',
+      user: uid,
+      timestamp: Date.now(),
+      idTask,
+      oldTask,
+      newTask: { ...oldTask, ...task },
+      fallback: task.name,
+    })
 
-    return Promise.all([updateTaskPromise])
+    return Promise.all([updateTaskPromise, historyPromise])
   },
 
   complete({ rootState }, { idHouse, task, deltaScore }) {
     const { uid } = rootState.auth.user
     const houseDoc = firestore().collection('houses').doc(idHouse)
     const addTaskPromise = houseDoc.collection('market').doc(task.id).update({
-      // TODO: Do this in the server! The date could be wrong in the client side
       lastTimeDone: Date.now(),
     })
 
@@ -86,21 +97,39 @@ export const actions = {
         })
       })
 
-    // TODO: Add DONE history
-
-    const addHistoryPromise = houseDoc.collection('history').add({
+    const historyPromise = houseDoc.collection('history').add({
       type: 'done',
       user: uid,
-      task,
+      timestamp: Date.now(),
+      idTask: task.id,
+      fallback: task.name,
       deltaScore,
     })
 
-    return Promise.all([addTaskPromise, addScoreToUserPromise, addHistoryPromise])
+    return Promise.all([addTaskPromise, addScoreToUserPromise, historyPromise])
   },
 
-  delete(_, { idHouse, idTask }) {
+  async delete({ rootState }, { idHouse, idTask }) {
+    const { uid } = rootState.auth.user
+
     const houseDoc = firestore().collection('houses').doc(idHouse)
-    // TODO: Update reference in history
-    return houseDoc.collection('market').doc(idTask).delete()
+
+    const task = await houseDoc.collection('market').doc(idTask).get()
+    const { name } = task.data()
+    const deleteTaskPromise = task.ref.delete()
+    const historyCol = houseDoc.collection('history')
+    const historyAddPromise = historyCol.add({
+      type: 'delete',
+      user: uid,
+      timestamp: Date.now(),
+      idTask,
+      fallback: name,
+    })
+    const historyRelated = await historyCol.where('idTask', '==', idTask).get()
+    await Promise.all([
+      ...historyRelated.docs.map((h) => h.ref.update({ fallback: name })),
+      deleteTaskPromise,
+      historyAddPromise,
+    ])
   },
 }

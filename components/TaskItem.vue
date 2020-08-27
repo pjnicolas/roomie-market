@@ -133,6 +133,7 @@ export default {
           this.$router.push('../market')
         } catch (err) {
         // TODO: toast
+          console.error(err)
           this.loading = false
         }
       } else {
